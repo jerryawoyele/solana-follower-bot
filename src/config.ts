@@ -24,12 +24,16 @@ export const PRIVATE_KEY = process.env.PRIVATE_KEY;
 export const JUPITER_API_KEY = process.env.JUPITER_API_KEY || undefined;
 
 // Slippage configuration
-export const SLIPPAGE_BPS = 500; // 5% slippage
+export const JUPITER_API = "https://quote-api.jup.ag/v6";
 
-// Priority fee for sell transactions (in micro-lamports)
-// This is added to the base fee to make transactions land faster.
-// 28000 is approx. $0.00125 at $150/SOL for a typical swap.
-export const SELL_PRIORITY_FEE_MICRO_LAMPORTS = 28000;
+// Slippage
+export const SLIPPAGE = 500; // In bps (50 = 0.5%)
 
-// Logging
+// Sell priority fee
+export const SELL_PRIORITY_FEE_MICRO_LAMPORTS = 20000; // 20,000 micro-lamports
+
+// Timeout for selling if target doesn't sell
+export const TIMEOUT_MINUTES = 2.5;
+
+// Verbose logging
 export const VERBOSE = true;

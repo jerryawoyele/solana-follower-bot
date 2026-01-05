@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { RPC_HTTP, MORALIS_API_KEY, VERBOSE, YOUR_WALLET } from "./config";
+import { RPC_HTTP, MORALIS_API_KEY, VERBOSE, YOUR_WALLET, TIMEOUT_MINUTES } from "./config";
 import { trackedPositions, TrackedPosition } from "./state";
 import { executeSell } from "./sellExecutor";
 import fetch from "cross-fetch";
@@ -196,6 +196,26 @@ async function monitorPosition(mint: string) {
         clearInterval(checkInterval);
         trackedPositions.delete(mint);
         return;
+      }
+
+      // TIMEOUT LOGIC
+      const timeSinceStart = Date.now() - position.startTime;
+      if (timeSinceStart > TIMEOUT_MINUTES * 60 * 1000) {
+        const targetCurrentBalanceCheck = await getWalletTokenBalance(position.targetWallet, mint);
+        const soldPercentageCheck = ((position.targetInitialBalance - (targetCurrentBalanceCheck || 0)) / position.targetInitialBalance) * 100;
+
+        if (soldPercentageCheck === 0) {
+          console.log(`\n🚨 TIMEOUT REACHED! Target has not sold after ${TIMEOUT_MINUTES} minutes.`);
+          console.log(`   → Selling 100% as a safety measure.\n`);
+          
+          await executeSell(mint, 100, `Timeout after ${TIMEOUT_MINUTES} mins`);
+          await waitForYourBalanceToDecrease(mint, yourCurrentBalance);
+          
+          isExited = true;
+          clearInterval(checkInterval);
+          trackedPositions.delete(mint);
+          return;
+        }
       }
 
       // Get target wallet's current balance

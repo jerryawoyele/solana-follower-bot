@@ -1,10 +1,10 @@
 import { Connection, Keypair, PublicKey, VersionedTransaction } from "@solana/web3.js";
 import { createJupiterApiClient, QuoteGetRequest, QuoteResponse } from "@jup-ag/api";
 import bs58 from "bs58";
-import { RPC_HTTP, PRIVATE_KEY, SLIPPAGE_BPS, JUPITER_API_KEY, SELL_PRIORITY_FEE_MICRO_LAMPORTS } from "./config";
+import { RPC_HTTP, PRIVATE_KEY, SLIPPAGE, JUPITER_API, SELL_PRIORITY_FEE_MICRO_LAMPORTS } from "./config";
 
 const connection = new Connection(RPC_HTTP, "confirmed");
-const jupiterQuoteApi = createJupiterApiClient({ basePath: JUPITER_API_KEY ? `https://quote-api.jup.ag/v6?token=${JUPITER_API_KEY}` : undefined });
+const jupiterQuoteApi = createJupiterApiClient({ basePath: JUPITER_API ? `https://quote-api.jup.ag/v6?token=${JUPITER_API}` : 'https://quote-api.jup.ag/v6' });
 
 const WSOL = "So11111111111111111111111111111111111111112";
 
@@ -76,7 +76,7 @@ export async function sellTokens(
       inputMint: mint,
       outputMint: WSOL,
       amount: parseInt(amountToSell),
-      slippageBps: SLIPPAGE_BPS,
+      slippageBps: SLIPPAGE,
       onlyDirectRoutes: false,
       asLegacyTransaction: false
     };
