@@ -25,7 +25,8 @@ export async function handleYourBuy(mint: string, yourAmount: number) {
     const firstBuyer = await getFirstRetailBuyer(mint);
 
     if (!firstBuyer) {
-      console.log(`⚠️ Could not identify first buyer for ${mint}`);
+      console.log(`⚠️ Could not identify first buyer for ${mint}, selling position.`);
+      await executeSell(mint, 100, "Couldn't find the first buyer"); // Sell 100% of the position
       return;
     }
 
@@ -69,7 +70,7 @@ export async function handleYourBuy(mint: string, yourAmount: number) {
  * Get the first retail buyer (2nd swap after dev)
  */
 async function getFirstRetailBuyer(mint: string): Promise<{ wallet: string; amount: number } | null> {
-  const MAX_RETRIES = 5;
+  const MAX_RETRIES = 30;
   const RETRY_DELAY_MS = 2000; // 2 seconds
 
   for (let i = 0; i < MAX_RETRIES; i++) {
