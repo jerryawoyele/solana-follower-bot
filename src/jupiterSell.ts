@@ -1,7 +1,7 @@
 import { Connection, Keypair, PublicKey, VersionedTransaction } from "@solana/web3.js";
 import { createJupiterApiClient, QuoteGetRequest, QuoteResponse } from "@jup-ag/api";
 import bs58 from "bs58";
-import { RPC_HTTP, PRIVATE_KEY, SLIPPAGE_BPS, JUPITER_API_KEY } from "./config";
+import { RPC_HTTP, PRIVATE_KEY, SLIPPAGE_BPS, JUPITER_API_KEY, SELL_PRIORITY_FEE_MICRO_LAMPORTS } from "./config";
 
 const connection = new Connection(RPC_HTTP, "confirmed");
 const jupiterQuoteApi = createJupiterApiClient({ basePath: JUPITER_API_KEY ? `https://quote-api.jup.ag/v6?token=${JUPITER_API_KEY}` : undefined });
@@ -100,7 +100,9 @@ export async function sellTokens(
         quoteResponse: quote,
         userPublicKey: wallet.publicKey.toBase58(),
         wrapAndUnwrapSol: true,
-        dynamicComputeUnitLimit: true
+        dynamicComputeUnitLimit: true,
+        // Add priority fee to increase transaction success rate
+        computeUnitPriceMicroLamports: SELL_PRIORITY_FEE_MICRO_LAMPORTS,
       }
     });
 
