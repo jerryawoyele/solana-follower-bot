@@ -69,35 +69,55 @@ export async function handleYourBuy(mint: string, yourAmount: number) {
  * Get the first retail buyer (2nd swap after dev)
  */
 async function getFirstRetailBuyer(mint: string): Promise<{ wallet: string; amount: number } | null> {
-  try {
-    const response = await fetch(
-      `https://solana-gateway.moralis.io/token/mainnet/${mint}/swaps?order=ASC&transactionTypes=buy&limit=2`,
-      {
-        headers: {
-          'accept': 'application/json',
-          'X-API-Key': MORALIS_API_KEY
+  const MAX_RETRIES = 5;
+  const RETRY_DELAY_MS = 2000; // 2 seconds
+
+  for (let i = 0; i < MAX_RETRIES; i++) {
+    try {
+      const response = await fetch(
+        `https://solana-gateway.moralis.io/token/mainnet/${mint}/swaps?order=ASC&transactionTypes=buy&limit=5`, // Fetch more swaps
+        {
+          headers: {
+            'accept': 'application/json',
+            'X-API-Key': MORALIS_API_KEY
+          }
         }
+      );
+
+      if (!response.ok) {
+        console.log(`   - Moralis API request failed (attempt ${i + 1}/${MAX_RETRIES}). Status: ${response.status}`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        continue;
       }
-    );
 
-    if (!response.ok) return null;
+      const data = await response.json();
 
-    const data = await response.json();
+      if (data.result && data.result.length > 1) {
+        // Try to find the first buyer that isn't us
+        for (let j = 1; j < data.result.length; j++) {
+          const buyer = data.result[j];
+          if (buyer.walletAddress.toLowerCase() !== YOUR_WALLET.toLowerCase()) {
+            return {
+              wallet: buyer.walletAddress,
+              amount: parseFloat(buyer.bought.amount)
+            };
+          }
+        }
+        console.log(`   - Could only find your own buys so far.`);
+      } else {
+        console.log(`   - Not enough swap data yet (found ${data.result?.length || 0} buys). Retrying...`);
+      }
 
-    if (!data.result || data.result.length < 2) {
-      return null;
+    } catch (error: any) {
+      console.log(`   - Error fetching swaps (attempt ${i + 1}/${MAX_RETRIES}):`, error.message);
     }
-
-    const firstRetailBuy = data.result[1];
-
-    return {
-      wallet: firstRetailBuy.walletAddress,
-      amount: parseFloat(firstRetailBuy.bought.amount)
-    };
-
-  } catch (error) {
-    return null;
+    
+    if (i < MAX_RETRIES - 1) {
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+    }
   }
+
+  return null;
 }
 
 /**

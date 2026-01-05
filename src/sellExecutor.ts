@@ -15,6 +15,8 @@ export async function executeSell(
     if (result.signature) {
       console.log(`   Signature: ${result.signature}`);
     }
+    // Wait for 5 seconds to allow the transaction to propagate
+    await new Promise(resolve => setTimeout(resolve, 5000));
   } else {
     console.log(`❌ Sell failed: ${result.error}`);
   }
