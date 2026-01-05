@@ -75,7 +75,7 @@ async function getFirstRetailBuyer(mint: string): Promise<{ wallet: string; amou
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
       const response = await fetch(
-        `https://solana-gateway.moralis.io/token/mainnet/${mint}/swaps?order=ASC&transactionTypes=buy&limit=5`, // Fetch more swaps
+        `https://solana-gateway.moralis.io/token/mainnet/${mint}/swaps?order=ASC&transactionTypes=buy&limit=10`, // Fetch more swaps
         {
           headers: {
             'accept': 'application/json',
