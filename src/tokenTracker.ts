@@ -19,6 +19,9 @@ export async function handleYourBuy(mint: string, yourAmount: number) {
   }
 
   try {
+    console.log(`🔍 Waiting 30 seconds before finding first buyer for: ${mint}...`);
+    await new Promise(resolve => setTimeout(resolve, 30000));
+
     console.log(`🔍 Finding first buyer after dev for: ${mint}...`);
 
     // Step 1: Get first retail buyer
@@ -70,7 +73,7 @@ export async function handleYourBuy(mint: string, yourAmount: number) {
  * Get the first retail buyer (2nd swap after dev)
  */
 async function getFirstRetailBuyer(mint: string): Promise<{ wallet: string; amount: number } | null> {
-  const MAX_RETRIES = 30;
+  const MAX_RETRIES = 15;
   const RETRY_DELAY_MS = 2000; // 2 seconds
 
   for (let i = 0; i < MAX_RETRIES; i++) {
@@ -210,7 +213,6 @@ async function monitorPosition(mint: string) {
           console.log(`   → Selling 100% as a safety measure.\n`);
           
           await executeSell(mint, 100, `Timeout after ${TIMEOUT_MINUTES} mins`);
-          await waitForYourBalanceToDecrease(mint, yourCurrentBalance);
           
           isExited = true;
           clearInterval(checkInterval);
