@@ -127,7 +127,7 @@ async function getFirstRetailBuyer(mint: string): Promise<{ wallet: string; amou
 /**
  * Get YOUR current token balance
  */
-async function getYourTokenBalance(mint: string): Promise<number> {
+export async function getYourTokenBalance(mint: string): Promise<number> {
   try {
     const yourWalletPubkey = new PublicKey(YOUR_WALLET);
     const mintPubkey = new PublicKey(mint);
